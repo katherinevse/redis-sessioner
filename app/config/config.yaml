@@ -8,5 +8,13 @@ redis:
   db: "${REDIS_DB}"
   session_ttl: 1800  #sec (30 минут)
 
+database:
+  host: "${DB_HOST}"
+  port: 5432
+  user: "${DB_USER}"
+  password: "${DB_PASSWORD}"
+  name: "${DB_NAME}"
+
+
 logger:
   level: "debug" # "info", "error"

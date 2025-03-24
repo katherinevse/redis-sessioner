@@ -12,6 +12,7 @@ type Config struct {
 	ServerCfg ServerConfig
 	RedisCfg  RedisConfig
 	LogCfg    LogConfig
+	DB        Database
 }
 
 type ServerConfig struct {
@@ -24,6 +25,14 @@ type RedisConfig struct {
 	Password   string `yaml:"password"`
 	DB         int    `yaml:"db"`
 	SessionTTL int64  `yaml:"session_ttl"`
+}
+
+type Database struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
+	Name     string `yaml:"name"`
 }
 
 type LogConfig struct {
@@ -48,6 +57,11 @@ func New() (*Config, error) {
 		return nil, fmt.Errorf("не удалось преобразовать SERVER_PORT: %w", err)
 	}
 
+	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		return nil, fmt.Errorf("не удалось преобразовать DB_PORT: %w", err)
+	}
+
 	return &Config{
 		ServerCfg: ServerConfig{
 			Host: os.Getenv("SERVER_HOST"),
@@ -58,6 +72,13 @@ func New() (*Config, error) {
 			Password:   os.Getenv("REDIS_PASS"),
 			DB:         redisDB,
 			SessionTTL: 1800,
+		},
+		DB: Database{
+			Host:     os.Getenv("DB_HOST"),
+			Port:     dbPort,
+			User:     os.Getenv("DB_USER"),
+			Password: os.Getenv("DB_PASSWORD"),
+			Name:     os.Getenv("DB_NAME"),
 		},
 		LogCfg: LogConfig{
 			Level: os.Getenv("LOG_LEVEL"),
