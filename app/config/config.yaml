@@ -1,0 +1,12 @@
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+redis:
+  addr: "${REDIS_ADDR}"
+  password: "${REDIS_PASS}"
+  db: "${REDIS_DB}"
+  session_ttl: 1800  #sec (30 минут)
+
+logger:
+  level: "debug" # "info", "error"
