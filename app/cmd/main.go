@@ -26,9 +26,6 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	//newsql := sql.DB{}
-	//newsql.QueryContext()
-
 	//TODO
 	//	logger := setupLogger(cfg.LoggerConfig.Level)
 	//	logger.Info("Loaded configuration", slog.Any("config", cfg))
