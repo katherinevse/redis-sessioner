@@ -1,12 +1,12 @@
 package main
 
 import (
-	"app/app/internal/config"
-	"app/app/internal/handler"
-	cache "app/app/internal/redis"
-	"app/app/internal/repository"
-	"app/app/internal/service"
-	"app/app/pkg/db"
+	"app/internal/config"
+	"app/internal/handler"
+	cache "app/internal/redis"
+	"app/internal/repository"
+	"app/internal/service"
+	"app/pkg/db"
 	"context"
 	"fmt"
 	"github.com/gorilla/mux"
