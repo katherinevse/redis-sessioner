@@ -40,7 +40,7 @@ type LogConfig struct {
 }
 
 func New() (*Config, error) {
-	err := godotenv.Load(".env")
+	err := godotenv.Load("app/internal/config/.env")
 	if err != nil {
 		log.Fatalf("Ошибка загрузки .env файла: %v", err)
 	} else {
