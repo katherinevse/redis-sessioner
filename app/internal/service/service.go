@@ -7,18 +7,22 @@ import (
 	"time"
 )
 
-//type Sessioner interface {
-//	GetSession(ctx context.Context, sessionID string) (string, error)     // Получить сессию (из Redis или БД)
-//	SaveSession(ctx context.Context, sessionID string, data string) error // Сохранить сессию (в БД и Redis)
-//	DeleteSession(ctx context.Context, sessionID string) error            // Удалить сессию (из Redis и БД)
-//}
+type RedisClient interface {
+	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
+	Get(ctx context.Context, key string) *redis.StringCmd
+	Del(ctx context.Context, keys ...string) *redis.IntCmd
+}
+
+type DBRepo interface {
+	GetSession(ctx context.Context, sessionID string) (string, error)
+}
 
 type SessionService struct {
-	db    DBRepository
+	db    DBRepo
 	cache RedisClient
 }
 
-func New(db DBRepository, cache RedisClient) *SessionService {
+func New(db DBRepo, cache RedisClient) *SessionService {
 	return &SessionService{db: db, cache: cache}
 }
 
@@ -32,8 +36,7 @@ func (s *SessionService) GetSession(ctx context.Context, sessionID string) (stri
 	}
 
 	// Если нет в Redis — берём из БД
-	data := ""
-	err = s.db.QueryRowContext(ctx, "SELECT data FROM sessions WHERE id = $1", sessionID).Scan(&data)
+	data, err := s.db.GetSession(ctx, sessionID)
 	if err != nil {
 		return "", err
 	}
@@ -43,10 +46,3 @@ func (s *SessionService) GetSession(ctx context.Context, sessionID string) (stri
 
 	return data, nil
 }
-
-// SetSession Сохранить сессию (в БД и Redis)
-func (s *SessionService) SetSession(ctx context.Context, sessionID string, data string) error {
-
-}
-
-//Удалить сессию (из Redis и БД)
