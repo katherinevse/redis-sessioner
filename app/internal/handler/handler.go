@@ -40,8 +40,7 @@ func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) RegisterRoutes(r *mux.Router) {
 	r.HandleFunc("/session/{sessionID}", h.GetSession).Methods("GET")
-
-	//r.HandleFunc("/session", h.CreateSession).Methods("POST")
-	//r.HandleFunc("/session", h.UpdateSession).Methods("PUT")
 	//r.HandleFunc("/session/{sessionID}", h.DeleteSession).Methods("DELETE")
+	//r.HandleFunc("/session", h.UpdateSession).Methods("PUT")
+
 }
