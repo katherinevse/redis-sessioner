@@ -1,40 +1,42 @@
 package handler
 
 import (
-	"context"
-	"fmt"
+	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
-	"time"
 )
 
 type Handler struct {
-	redisClient RedisClient
+	sessionService SessionManager
 }
 
-func New(redisClient RedisClient) *Handler {
+func New(sessionService SessionManager) *Handler {
 	return &Handler{
-		redisClient: redisClient,
+		sessionService: sessionService,
 	}
 }
 
-func (h *Handler) CreateSession(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("userID") //извлекаем из запроса
-	ttl := time.Duration(30) * time.Minute
-	key := fmt.Sprintf("session:%s", userID)
-	value := "active"
+func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
+	sessionID := mux.Vars(r)["sessionID"] //мапа приходит проверить все данные
 
-	err := h.redisClient.Set(context.Background(), key, value, ttl)
+	sessionData, err := h.sessionService.GetSession(r.Context(), sessionID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Ошибка создания сессии: %v", err), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Сессия создана"))
+
+	if sessionData == "" {
+		http.Error(w, "Сессия не найдена", http.StatusNotFound)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{"sessionData": sessionData})
 }
 
-func (h *Handler) RegisterRoutes(router *mux.Router) {
-	router.HandleFunc("/session/create", h.CreateSession).Methods("POST")
-	router.HandleFunc("/session/{userID}", h.GetSession).Methods("GET")
-	router.HandleFunc("/session/delete", h.DeleteSession).Methods("DELETE")
+func (h *Handler) RegisterRoutes(r *mux.Router) {
+	r.HandleFunc("/session/{sessionID}", h.GetSession).Methods("GET")
+
+	//r.HandleFunc("/session", h.CreateSession).Methods("POST")
+	//r.HandleFunc("/session", h.UpdateSession).Methods("PUT")
+	//r.HandleFunc("/session/{sessionID}", h.DeleteSession).Methods("DELETE")
 }
