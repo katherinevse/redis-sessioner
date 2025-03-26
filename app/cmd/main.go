@@ -13,8 +13,15 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/redis/go-redis/v9"
 	"log"
+	"log/slog"
 	"net/http"
+	"os"
 	"time"
+)
+
+const (
+	envDev  = "dev"
+	envProd = "prod"
 )
 
 func main() {
@@ -29,9 +36,8 @@ func main() {
 	}
 	defer dbConn.Close()
 
-	//TODO
-	//	logger := setupLogger(cfg.LoggerConfig.Level)
-	//	logger.Info("Loaded configuration", slog.Any("config", cfg))
+	logger := setupLogger(cfg.LogCfg.Level)
+	logger.Info("Loaded configuration", slog.Any("config", cfg))
 
 	rawRedisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisCfg.Addr,
@@ -63,4 +69,25 @@ func main() {
 		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 
+}
+
+func setupLogger(env string) *slog.Logger {
+	var logger *slog.Logger
+
+	switch env {
+	case envDev:
+		logger = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
+		)
+	case envProd:
+		logger = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+	default:
+		logger = slog.New(
+			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
+		)
+	}
+
+	return logger
 }
