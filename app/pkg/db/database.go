@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	_ "github.com/lib/pq"
 	"log"
 	"time"
 )
@@ -15,7 +16,7 @@ func NewPostgresDB(cfg *config.Config) (*sql.DB, error) {
 		cfg.DB.Host,
 		cfg.DB.Port,
 		cfg.DB.User,
-		cfg.DB.Port,
+		cfg.DB.Password,
 		cfg.DB.Name,
 	)
 	fmt.Println("DSN:", dsn)

@@ -3,6 +3,7 @@ package main
 import (
 	"app/internal/config"
 	"app/internal/handler"
+	"app/internal/middleware"
 	cache "app/internal/redis"
 	"app/internal/repository"
 	"app/internal/service"
@@ -12,6 +13,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/redis/go-redis/v9"
 	"log"
+	"net/http"
+	"time"
 )
 
 func main() {
@@ -45,9 +48,19 @@ func main() {
 	sessionService := service.New(postgresRepo, redisClient)
 	h := handler.New(sessionService) //TODO  service слой
 
+	rateLimiter := middleware.NewRateLimiter(rawRedisClient, 5, time.Minute)
+
 	r := mux.NewRouter()
+	r.Use(middleware.RateLimitMiddleware(rateLimiter))
+
 	h.RegisterRoutes(r)
 
-	fmt.Printf("Server is running at %s:%d\n", cfg.ServerCfg.Host, cfg.ServerCfg.Port)
+	serverAddr := fmt.Sprintf("%s:%d", cfg.ServerCfg.Host, cfg.ServerCfg.Port)
+	fmt.Printf("Server is running at %s\n", serverAddr)
 	fmt.Printf("Redis Address: %s\n", cfg.RedisCfg.Addr)
+
+	if err := http.ListenAndServe(serverAddr, r); err != nil {
+		log.Fatalf("Ошибка запуска сервера: %v", err)
+	}
+
 }

@@ -10,6 +10,8 @@ type RedisClient interface {
 	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
 	Get(ctx context.Context, key string) *redis.StringCmd
 	Del(ctx context.Context, keys ...string) *redis.IntCmd
+	Incr(ctx context.Context, key string) *redis.IntCmd
+	Expire(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd
 }
 
 type Client struct {
@@ -35,4 +37,12 @@ func (r *Client) Get(ctx context.Context, key string) *redis.StringCmd {
 // Delete удаляет ключ из Redis
 func (r *Client) Del(ctx context.Context, keys ...string) *redis.IntCmd {
 	return r.client.Del(ctx, keys...)
+}
+
+func (r *Client) Incr(ctx context.Context, key string) *redis.IntCmd {
+	return r.client.Incr(ctx, key)
+}
+
+func (r *Client) Expire(ctx context.Context, key string, expiration time.Duration) *redis.BoolCmd {
+	return r.client.Expire(ctx, key, expiration)
 }
