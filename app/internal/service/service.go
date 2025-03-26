@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -29,10 +30,13 @@ func New(db DBRepo, cache RedisClient) *SessionService {
 // GetSession Получить сессию (из Redis или БД)
 func (s *SessionService) GetSession(ctx context.Context, sessionID string) (string, error) {
 	cachedValue, err := s.cache.Get(ctx, sessionID).Result()
-	if err == nil {
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			return "", err
+		}
+	} else {
+		fmt.Println("Данные взяты из Redis:", cachedValue)
 		return cachedValue, nil
-	} else if !errors.Is(redis.Nil, err) {
-		return "", err
 	}
 
 	// Если нет в Redis — берём из БД
@@ -42,7 +46,7 @@ func (s *SessionService) GetSession(ctx context.Context, sessionID string) (stri
 	}
 
 	// Кешируем в Redis на 30 минут
-	s.cache.Set(ctx, sessionID, data, 30*time.Minute)
+	go s.cache.Set(ctx, sessionID, data, 30*time.Minute)
 
 	return data, nil
 }

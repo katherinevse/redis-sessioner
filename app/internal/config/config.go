@@ -8,6 +8,8 @@ import (
 	"strconv"
 )
 
+const env = "internal/config/.env"
+
 type Config struct {
 	ServerCfg ServerConfig
 	RedisCfg  RedisConfig
@@ -40,7 +42,7 @@ type LogConfig struct {
 }
 
 func New() (*Config, error) {
-	err := godotenv.Load("internal/config/.env")
+	err := godotenv.Load(env)
 	if err != nil {
 		log.Fatalf("Ошибка загрузки .env файла: %v", err)
 	} else {

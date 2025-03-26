@@ -22,7 +22,11 @@ func New(sessionService SessionManager) *Handler {
 }
 
 func (h *Handler) GetSession(w http.ResponseWriter, r *http.Request) {
-	sessionID := mux.Vars(r)["sessionID"] //мапа приходит проверить все данные
+	sessionID, ok := mux.Vars(r)["sessionID"]
+	if !ok || sessionID == "" {
+		http.Error(w, "sessionID is required", http.StatusBadRequest)
+		return
+	}
 
 	sessionData, err := h.sessionService.GetSession(r.Context(), sessionID)
 	if err != nil {
