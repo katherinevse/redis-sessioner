@@ -1,10 +1,15 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"net/http"
 )
+
+type SessionManager interface {
+	GetSession(ctx context.Context, sessionID string) (string, error)
+}
 
 type Handler struct {
 	sessionService SessionManager
