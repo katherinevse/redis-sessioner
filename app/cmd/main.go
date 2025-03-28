@@ -25,19 +25,20 @@ const (
 )
 
 func main() {
+
 	cfg, err := config.New()
 	if err != nil {
 		log.Fatalf("Ошибка конфигурации: %v", err)
 	}
+
+	logger := setupLogger(cfg.LogCfg.Level)
+	logger.Info("Loaded configuration", slog.Any("config", cfg))
 
 	dbConn, err := db.NewPostgresDB(cfg)
 	if err != nil {
 		log.Fatalf("Ошибка подключения к PostgreSQL: %v", err)
 	}
 	defer dbConn.Close()
-
-	logger := setupLogger(cfg.LogCfg.Level)
-	logger.Info("Loaded configuration", slog.Any("config", cfg))
 
 	rawRedisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisCfg.Addr,
@@ -71,6 +72,7 @@ func main() {
 
 }
 
+// TODO добавить логи везде!
 func setupLogger(env string) *slog.Logger {
 	var logger *slog.Logger
 
